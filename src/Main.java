@@ -9,18 +9,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Main {
     private static final Path FILE_PATH = Paths.get("words.txt");
-    private static ArrayList<String> listWords = new ArrayList<>();;
+    private static ArrayList<String> listWords = new ArrayList<>();
+    private static Random random = new Random();
 
     public static void main(String[] args) {
         // Проверяем реализованный метод
         var words = getListWords();
-
-        for (String word : words) {
-            System.out.println(word);
-        }
+        System.out.println(getRandomWord());
     }
 
     // Метод для чтения слов из файла и загрузка их в коллекцию
@@ -39,7 +38,9 @@ public class Main {
     }
 
     // Метод для получения рандомного слова из коллекции
-    public static void getRandomWord() {}
+    public static String getRandomWord() {
+        return listWords.get(random.nextInt(listWords.size()));
+    }
 
     // Основной цикл игры
     public static void startGameLoop() {}
