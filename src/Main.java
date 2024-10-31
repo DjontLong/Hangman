@@ -28,6 +28,7 @@ public class Main {
     private static ArrayList<String> listWords = new ArrayList<>();
     private static Random random = new Random();
     private static Scanner scanner = new Scanner(System.in);
+    private static int maxAttempts = 9;
 
     public static void main(String[] args) {
         // Проверяем реализованный метод
@@ -50,6 +51,7 @@ public class Main {
     }
 
     public static void drawingStartMenu() {
+        System.out.println("Слов загружено: " + listWords.size());
         System.out.println("=====================");
         System.out.println("1. Новая игра");
         System.out.println("2. Выход");
@@ -60,12 +62,31 @@ public class Main {
     // Основной цикл игры
     public static void startGameLoop() {
         String word = getRandomWord();
+
         char[] hiddenWord = new char[word.length()];
         Arrays.fill(hiddenWord, '*');
-        System.out.println(hiddenWord);
 
-        while (new String(hiddenWord).contains("*")) {
-            // Остановился здесь
+        // Счетчик ошибок
+        int error = 0;
+
+        while (new String(hiddenWord).contains("*") && maxAttempts > 0) {
+            // Вызываем метод состояния игры
+            showGameState(error, hiddenWord);
+            // Вызвать метод проверки буквы
+            char letter = getInputChar();
+            // Вызываем метод, который обновляет скрытое слово
+            updateHiddenWord(word, hiddenWord, letter);
+
+            if (!updateHiddenWord(word, hiddenWord, letter)) {
+                error++;
+                maxAttempts--;
+            }
+        }
+
+        if (new String(hiddenWord).contains("*")) {
+            System.out.println("Вы проиграли! Правильное слово было: " + word);
+        } else {
+            System.out.println("Победа!");
         }
     }
 
@@ -86,15 +107,32 @@ public class Main {
 
     // Метод для получения рандомного слова из коллекции
     public static String getRandomWord() {
-        return listWords.get(random.nextInt(listWords.size()));
+        String randomWord;
+        do {
+            randomWord = listWords.get(random.nextInt(listWords.size()));
+        } while (randomWord.length() < 5 || randomWord.length() > 10);
+        return randomWord;
     }
 
-    public static char[] getHiddenWorld(String word) {
-        char[] hiddenWord = word.toCharArray();
+    public static char getInputChar() {
+        char letter;
 
+        return scanner.next().toLowerCase().charAt(0);
+    }
+    public static void showGameState(int error, char[] arrHiddenChar) {
+        System.out.println("Слово: " + new String(arrHiddenChar));
+        System.out.println("Ошибки: " + error);
+        System.out.println("Введите букву: ");
+    }
+
+    public static boolean updateHiddenWord(String word, char[] arrHiddenChar, char letter) {
+        boolean isGuessed = false;
         for (int i = 0; i < word.length(); i++) {
-            // Подумать и не запутаться
+            if (word.charAt(i) == letter) {
+                arrHiddenChar[i] = letter;
+                isGuessed = true;
+            }
         }
-        return hiddenWord;
+        return isGuessed;
     }
 }
