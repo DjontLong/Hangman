@@ -46,10 +46,25 @@ public class Main {
                     return;
                 default:
                     System.out.println("Некорректный ввод. Повторите попытку!");
+                    System.out.println();
             }
         } while (true);
     }
 
+    // Метод для чтения слов из файла и загрузка их в коллекцию
+    public static ArrayList<String> getListWords() {
+        // Читаем файл построчно и добавляем в коллецию
+        // Должны вернуть ArrayList со словами
+        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                listWords.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return listWords;
+    }
     public static void drawingStartMenu() {
         System.out.println("Слов загружено: " + listWords.size());
         System.out.println("=====================");
@@ -81,28 +96,17 @@ public class Main {
                 error++;
                 maxAttempts--;
             }
+            // В случае ошибки вызываем метод состояния виселицы
+            showGallows(error);
         }
 
         if (new String(hiddenWord).contains("*")) {
             System.out.println("Вы проиграли! Правильное слово было: " + word);
+            System.out.println();
         } else {
             System.out.println("Победа!");
+            System.out.println();
         }
-    }
-
-    // Метод для чтения слов из файла и загрузка их в коллекцию
-    public static ArrayList<String> getListWords() {
-        // Читаем файл построчно и добавляем в коллецию
-        // Должны вернуть ArrayList со словами
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                listWords.add(line);
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        return listWords;
     }
 
     // Метод для получения рандомного слова из коллекции
@@ -113,18 +117,16 @@ public class Main {
         } while (randomWord.length() < 5 || randomWord.length() > 10);
         return randomWord;
     }
-
-    public static char getInputChar() {
-        char letter;
-
-        return scanner.next().toLowerCase().charAt(0);
-    }
     public static void showGameState(int error, char[] arrHiddenChar) {
         System.out.println("Слово: " + new String(arrHiddenChar));
         System.out.println("Ошибки: " + error);
         System.out.println("Введите букву: ");
     }
+    public static char getInputChar() {
+        char letter;
 
+        return scanner.next().toLowerCase().charAt(0);
+    }
     public static boolean updateHiddenWord(String word, char[] arrHiddenChar, char letter) {
         boolean isGuessed = false;
         for (int i = 0; i < word.length(); i++) {
@@ -134,5 +136,90 @@ public class Main {
             }
         }
         return isGuessed;
+    }
+    public static void showGallows(int error) {
+        switch (error) {
+            case 1:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |\n" +
+                        " |\n" +
+                        " |\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 2:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |\n" +
+                        " |\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 3:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |   |\n" +
+                        " |\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 4:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\n" +
+                        " |\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 5:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\\\n" +
+                        " |\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 6:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\\\n" +
+                        " |  /\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 7:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\\\n" +
+                        " |  / \\\n" +
+                        " |\n" +
+                        "_|_\n");
+                break;
+            case 8:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\\\n" +
+                        " |  / \\_\n" +
+                        " |    \n" +
+                        "_|_\n");
+                break;
+            case 9:
+                System.out.println(" -----\n" +
+                        " |   |\n" +
+                        " |   O\n" +
+                        " |  /|\\\n" +
+                        " | _/ \\_\n" +
+                        " |    \n" +
+                        "_|_\n");
+                break;
+        }
     }
 }
