@@ -1,27 +1,11 @@
-//При старте, приложение предлагает начать новую игру или выйти из приложения
-//При начале новой игры, случайным образом загадывается слово, и игрок начинает процесс по его отгадыванию
-//После каждой введенной буквы выводим в консоль счётчик ошибок, текущее состояние виселицы (нарисованное ASCII символами)
-//По завершении игры выводим результат (победа или поражение) и возвращаемся к состоянию #1 - предложение начать новую игру или выйти из приложения
-
-//System.out.println("=====================");
-//System.out.println("1. Новая игра");
-//System.out.println("2. Выход");
-//System.out.println("=====================");
-//System.out.print("Выберите опцию: ");
-
-//System.out.println("Слово: " + );
-//System.out.println("Ошибки: " + error);
-//System.out.println("Введите букву: ");
-
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     private static final Path FILE_PATH = Paths.get("words.txt");
@@ -29,49 +13,81 @@ public class Main {
     private static Random random = new Random();
     private static Scanner scanner = new Scanner(System.in);
     private static int maxAttempts = 9;
-
-    public static void main(String[] args) {
-        // Проверяем реализованный метод
+    private static final String INCORRECT_INPUT = "Некорректный ввод. Повторите попытку!";
+    private static final String GOODBYE = "Всего доброго";
+    private static final String ERROR = "Произошла ошибка: ";
+    private static final String WORDS_LOADED = "Слов загружено: ";
+    private static final String NEW_GAME = "1. Новая игра";
+    private static final String EXIT = "2. Выход";
+    private static final String SELECT_OPTION = "Выберите опцию: ";
+    private static final String YOU_LOST = "Вы проиграли! Правильное слово было: ";
+    private static final String YOU_WIN = "Победа!";
+    private static final String WORD = "Слово: ";
+    private static final String ERRORS = "Ошибки: ";
+    private static final String ENTER_LETTER = "Введите букву: ";
+    private static final String NOT_FOUND = "Файл words.txt не найден";
+    public static void main(String[] args) throws IOException {
+        // Загружаем список слов
         listWords = getListWords();
-        do {
-            drawingStartMenu();
 
-            int inputMenu = scanner.nextInt();
-            switch (inputMenu) {
-                case 1:
-                    startGameLoop();
-                    break;
-                case 2:
-                    System.out.println("Всего доброго!");
-                    return;
-                default:
-                    System.out.println("Некорректный ввод. Повторите попытку!");
-                    System.out.println();
-            }
-        } while (true);
+        try {
+            do {
+                drawingStartMenu();
+                int inputMenu = 0;
+
+                try {
+                    inputMenu = scanner.nextInt();
+                } catch (InputMismatchException e) {
+                    System.out.println(INCORRECT_INPUT);
+                    scanner.next(); // Очищаем буфер сканера
+                    continue;
+                }
+
+                switch (inputMenu) {
+                    case 1:
+                        startGameLoop();
+                        break;
+                    case 2:
+                        System.out.println(GOODBYE);
+                        return;
+                    default:
+                        System.out.println(INCORRECT_INPUT);
+                        System.out.println();
+                }
+            } while (true);
+        } catch (Exception e) {
+            System.out.println(ERROR + e.getMessage());
+        }
     }
 
     // Метод для чтения слов из файла и загрузка их в коллекцию
-    public static ArrayList<String> getListWords() {
+    public static ArrayList<String> getListWords() throws IOException {
         // Читаем файл построчно и добавляем в коллецию
         // Должны вернуть ArrayList со словами
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                listWords.add(line);
+        try (InputStream resource = Main.class.getClassLoader().getResourceAsStream("words.txt")) {
+            if (resource == null) {
+                System.out.println(NOT_FOUND);
+                return listWords;
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    listWords.add(line);
+                }
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
         return listWords;
     }
+
     public static void drawingStartMenu() {
-        System.out.println("Слов загружено: " + listWords.size());
+        System.out.println(WORDS_LOADED + listWords.size());
         System.out.println("=====================");
-        System.out.println("1. Новая игра");
-        System.out.println("2. Выход");
+        System.out.println(NEW_GAME);
+        System.out.println(EXIT);
         System.out.println("=====================");
-        System.out.print("Выберите опцию: ");
+        System.out.print(SELECT_OPTION);
     }
 
     // Основной цикл игры
@@ -101,10 +117,10 @@ public class Main {
         }
 
         if (new String(hiddenWord).contains("*")) {
-            System.out.println("Вы проиграли! Правильное слово было: " + word);
+            System.out.println(YOU_LOST + word);
             System.out.println();
         } else {
-            System.out.println("Победа!");
+            System.out.println(YOU_WIN);
             System.out.println();
         }
     }
@@ -117,16 +133,17 @@ public class Main {
         } while (randomWord.length() < 5 || randomWord.length() > 10);
         return randomWord;
     }
-    public static void showGameState(int error, char[] arrHiddenChar) {
-        System.out.println("Слово: " + new String(arrHiddenChar));
-        System.out.println("Ошибки: " + error);
-        System.out.println("Введите букву: ");
-    }
-    public static char getInputChar() {
-        char letter;
 
+    public static void showGameState(int error, char[] arrHiddenChar) {
+        System.out.println(WORD + new String(arrHiddenChar));
+        System.out.println(ERRORS + error);
+        System.out.println(ENTER_LETTER);
+    }
+
+    public static char getInputChar() {
         return scanner.next().toLowerCase().charAt(0);
     }
+
     public static boolean updateHiddenWord(String word, char[] arrHiddenChar, char letter) {
         boolean isGuessed = false;
         for (int i = 0; i < word.length(); i++) {
@@ -137,6 +154,7 @@ public class Main {
         }
         return isGuessed;
     }
+
     public static void showGallows(int error) {
         switch (error) {
             case 1:
